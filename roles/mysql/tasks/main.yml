@@ -1,0 +1,96 @@
+---
+
+- name: Install MySQL Packages [RedHat]
+  yum: name={{ item }} update_cache=yes state=latest
+  with_items:
+    - mariadb-server
+  when: ansible_os_family == 'RedHat'
+
+- name: Install MySQL Packages [Ubuntu]
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: [ 'mysql-server', 'python3-pymysql', 'php-mysql']
+  when: ansible_os_family == 'Debian'
+ 
+- name: Start mysqld service [RedHat]
+  systemd: 
+    name: mariadb
+    state: started
+    enabled: yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Start mysql service [Ubuntu]
+  systemd: 
+    name: mysql
+    state: started
+    enabled: yes
+  when: ansible_os_family == 'Debian'
+
+
+- name: Set root mysql config
+  template:
+    src: root.my.cnf.tpl
+    dest: /root/.my.cnf
+    mode: 0400
+
+- name: Set mysql main config 
+  template:
+    src: my.cnf.tpl
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart mysqld
+
+- name: Restart mysqld
+  systemd:
+    name: mariadb
+    state: restarted
+  when: ansible_os_family == 'RedHat'
+
+- name: Remove all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: '{{ db_root_password }}'
+    login_unix_socket: '{{ db_sock_path }}'
+
+- name: Remove the MySQL test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: '{{ db_root_password }}'
+    login_unix_socket: '{{ db_sock_path }}'
+
+- name: Set MySQL root Password
+  mysql_user:
+    login_user: 'root'
+    login_password: '{{ db_root_password }}'
+    login_unix_socket: '{{ db_sock_path }}'
+    check_implicit_admin: yes
+    host: 'localhost'
+    user: 'root'
+    password: '{{ db_root_password }}'
+    state: present
+ 
+- name: Creates database for WordPress
+  mysql_db:
+    name: '{{ db_name }}'
+    state: present
+    login_user: root
+    login_password: '{{ db_root_password }}'
+    login_unix_socket: '{{ db_sock_path }}'
+ 
+- name: Create MySQL user for WordPress
+  mysql_user:
+    name: '{{ db_user }}'
+    password: '{{ db_password }}'
+    priv: '{{ db_name }}.*:ALL'
+    state: present
+    login_user: root
+    login_password: '{{ db_root_password }}'
+    login_unix_socket: '{{ db_sock_path }}'
+
+...

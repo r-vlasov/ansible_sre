@@ -1,0 +1,14 @@
+---
+
+- hosts: "servers"
+  become: true
+  vars_files: "vars.yml"
+  roles:
+    #- mysql
+      #- selinux
+      # - zabbix
+      #- apache
+    - wordpress
+    - nginx
+
+...

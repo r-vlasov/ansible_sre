@@ -1,0 +1,27 @@
+#PHP Settings
+php_modules: [ 'php', 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
+ 
+#DB Settings
+db_name: "wpdb"
+db_user: "wpuser"
+db_password: "thereshouldbethesecret"
+db_root_password: "thereshouldbethesecret"
+
+#Web
+http_host: "wp.example.com"
+http_port: "8080"
+http_conf: "wp.conf"
+
+#nginx
+nginx_path: "/etc/nginx"
+nginx_sites: "{{ nginx_path }}/conf.d"
+
+#zabbix
+almalinux_zabbix_log_path: "/var/log/zabbix/zabbix_agentd.log"
+debian_zabbix_log_path: "/var/log/zabbix-agent/zabbix_agentd.log"
+zabbix_log_file: "{% if ansible_os_family == 'RedHat' %}{{ almalinux_zabbix_log_path }}{% elif ansible_os_family == 'Debian' %}{{ debian_zabbix_log_path }}{% endif %}"
+
+#mysql
+debian_db_sock_path: /var/run/mysqld/mysqld.sock
+almalinux_db_sock_path: /var/lib/mysql/mysql.sock
+db_sock_path: "{% if ansible_os_family == 'RedHat' %}{{ almalinux_db_sock_path }}{% elif ansible_os_family == 'Debian' %}{{ debian_db_sock_path }}{% endif %}"

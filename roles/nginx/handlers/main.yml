@@ -1,0 +1,6 @@
+---
+- name: enable nginx
+  systemd:
+    state: "restarted"
+    enabled: "yes"
+...

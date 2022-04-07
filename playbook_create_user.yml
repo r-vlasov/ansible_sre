@@ -1,0 +1,35 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Make sure we have a 'roman' group
+    become: yes
+    group:
+      name: roman
+      state: present
+
+  - name: Allow 'roman' group to have passwordless sudo
+    become: yes
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%roman'
+      line: '%roman ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: Add sudoers users to roman group
+    become: yes
+    user:
+      name=roman
+      groups=roman
+      append=yes
+      state=present
+      createhome=yes
+
+  - name: Set up authorized keys for the deployer user
+    become: yes
+    authorized_key: user=roman key="{{item}}"
+    with_file:
+      - /home/roman/.ssh/id_rsa.pub
+
+...

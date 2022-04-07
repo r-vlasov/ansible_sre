@@ -1,0 +1,40 @@
+---
+- name: Install zabbix agent [RedHat]
+  become: yes
+  dnf:
+    name: zabbix-agent
+    state: present
+  when: ansible_os_family == "RedHat"
+  
+- name: Install zabbix agent [Ubuntu]
+  become: yes
+  apt:
+    name: zabbix-agent
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Stop service zabbix-agent
+  become: yes
+  systemd:
+    name: zabbix-agent
+    state: stopped
+
+- name: Remove zabbix config file
+  become: yes
+  file:
+    path: /etc/zabbix/zabbix_agentd.conf
+    state: absent
+
+- name: Create new zabbix config file from template
+  become: yes
+  template:
+    src: "zabbix_agentd.conf.tpl"
+    dest: "/etc/zabbix/zabbix_agentd.conf"
+
+- name: Start service zabbix-agent
+  become: yes
+  service:
+    name: zabbix-agent
+    state: started
+    enabled: yes
+...

@@ -1,0 +1,6 @@
+---
+- name: reload apache
+  systemd:
+    name: "{% if ansible_os_family == 'RedHat' %}httpd{% else %}apache2{% endif %}"
+    state: restarted
+...

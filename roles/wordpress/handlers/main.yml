@@ -1,0 +1,6 @@
+---
+- name: clear wordpress download
+  file:
+    path: "latest.tar.gz"
+    state: absent
+...

@@ -1,0 +1,65 @@
+---
+#- name: Install PHP Remi Repository
+#command: "dnf -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+ 
+#- name: Enable PHP Remi Repository
+#command: dnf module reset php -y
+#command: dnf module enable php:remi-7.4 -y
+ 
+#- name: Install PHP Extensions
+#dnf: name={{ item }} update_cache=yes state=latest
+#loop: "{{ php_modules }}"
+
+- name: Download latest WordPress
+  command: curl -O https://wordpress.org/latest.tar.gz
+  environment: 
+    https_proxy: 10.115.13.1:8080
+
+- name: Unpack latest WordPress
+  command: "rm -rf /var/www/wordpress"
+  command: "tar xzf latest.tar.gz --directory /var/www"
+
+- name: Delete old wp directory
+  file:
+    state: absent
+    path: "/var/www/{{ http_host }}"
+  notify:
+    - clear wordpress download
+
+- name: Change wordpress root-directory name
+  command: "mv /var/www/wordpress /var/www/{{ http_host }}"
+ 
+- name: Set ownership
+  file:
+    path: "/var/www/{{ http_host }}"
+    state: directory
+    recurse: yes
+    owner: "{% if ansible_os_family == 'RedHat' %}apache{% else %}www-data{% endif %}"
+    group: "{% if ansible_os_family == 'RedHat' %}apache{% else %}www-data{% endif %}"
+
+ 
+- name: Set permissions for directories
+  shell: "/usr/bin/find /var/www/{{ http_host }} -type d -exec chmod 755 {} \\;"
+ 
+- name: Set permissions for files
+  shell: "/usr/bin/find /var/www/{{ http_host }} -type f -exec chmod 644 {} \\;"
+ 
+- name: Copy sample config file
+  command: "mv /var/www/{{ http_host }}/wp-config-sample.php /var/www/{{ http_host }}/wp-config.php creates=/var/www/{{ http_host }}/wp-config.php"
+  become: yes
+ 
+- name: Update WordPress config file
+  lineinfile:
+    path: "/var/www/{{ http_host }}/wp-config.php"
+    regexp: "{{item.regexp}}"
+    line: "{{item.line}}"
+  with_items:
+    - {'regexp': "define\\( 'DB_NAME', '(.)+' \\);", 'line': "define( 'DB_NAME', '{{ db_name }}' );"}
+    - {'regexp': "define\\( 'DB_USER', '(.)+' \\);", 'line': "define( 'DB_USER', '{{ db_user }}' );"}
+    - {'regexp': "define\\( 'DB_PASSWORD', '(.)+' \\);", 'line': "define( 'DB_PASSWORD', '{{ db_password }}' );"}
+
+- name: Update WordPress config file - WPSITEURL, WPHOME
+  lineinfile:
+    path: "/var/www/{{ http_host }}/wp-config.php"
+    line: "define('WP_SITEURL','http://{{ inventory_hostname }}');\ndefine('WP_HOME','http://{{ inventory_hostname }}');\n"
+...

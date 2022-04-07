@@ -1,0 +1,10 @@
+---
+- hosts: "servers"
+  become: yes
+  tasks:
+  - name: Delete default user
+    user:
+      name: sre-quest
+      state: absent
+      remove: yes
+...

@@ -1,0 +1,6 @@
+---
+- name: restart mysqld
+  systemd:
+    name: "{% if ansible_os_family == 'RedHat' %}mariadb{% else %}mysql{% endif %}"
+    state: restarted
+...

@@ -1,0 +1,32 @@
+---
+- name: 'Install nginx via dnf [RedHat]'
+  dnf:
+    name: "nginx"
+    state: "latest"
+    update_cache: true
+  notify: "enable nginx"
+  when: ansible_os_family == 'RedHat'
+
+- name: 'Install nginx via apt [Debian]'
+  apt:
+    name: "nginx"
+    state: "latest"
+    update_cache: true
+  notify: "enable nginx"
+  when: ansible_os_family == 'Debian'
+
+- name: "Setup nginx main configuration"
+  template:
+    src: "nginx.conf.tpl"
+    dest: "{{ nginx_path }}/nginx.conf"
+
+- name: "Setup nginx web-host configuration"
+  template:
+    src: "wp.conf.tpl"
+    dest: "{{ nginx_sites }}/wp.conf"
+
+- name: "Reload nginx"
+  systemd:
+    name: "nginx"
+    state: "reloaded"
+...

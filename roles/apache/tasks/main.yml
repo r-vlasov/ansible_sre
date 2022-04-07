@@ -1,0 +1,72 @@
+---     
+- name: Install HTTP Packages [RedHat]
+  dnf: 
+    name: httpd, httpd-tools, mod_ssl, php-fpm
+    update_cache: yes 
+    state: latest
+  when: ansible_os_family == 'RedHat'
+ 
+- name: Install HTTP Packages [Debian]
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: [ 'apache2', 'php', 'libapache2-mod-php', 'wordpress' ]
+  when: ansible_os_family == 'Debian'
+
+- name: Start httpd service [RedHat]
+  systemd:
+    name: php-fpm
+    state: started
+    enabled: yes
+  systemd: 
+    name: httpd
+    state: started
+    enabled: yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Create Apache Document Root
+  file:
+    path: '/var/www/{{ http_host }}'
+    state: directory
+    owner: 'nobody'
+    group: 'nogroup'
+    mode: '0755'
+ 
+- name: Set up Apache VirtualHost
+  template:
+    src: "httpd.conf"
+    dest: "/etc/httpd/conf.d/{{ http_conf }}"
+    owner: nobody
+    group: nogroup
+    mode: '0644'
+  when: ansible_os_family == 'RedHat'
+
+- name: Set up Apache VirtualHost [Debian]
+  template:
+    src: "httpd.conf"
+    dest: "/etc/apache2/sites-available/{{ http_conf }}"
+    owner: nobody
+    group: nogroup
+    mode: '0644'
+  when: ansible_os_family == 'Debian'
+
+- name: Enable rewrite module [Debian]
+  shell: /usr/sbin/a2enmod rewrite
+  notify: reload apache
+  when: ansible_os_family == 'Debian'
+
+- name: Enable new site [Debian]
+  shell: "/usr/sbin/a2ensite {{ http_conf }}"
+  notify: reload apache
+  when: ansible_os_family == 'Debian'
+
+- name: apache2 listen on port 8080
+  lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen 80$" line="Listen 8080" state=present
+  notify: reload apache
+  when: ansible_os_family == 'Debian'
+
+- name: Start apache2 service [Debian]
+  systemd:
+    name: apache2
+    state: started
+    enabled: yes
+  when: ansible_os_family == 'Debian'
+...
