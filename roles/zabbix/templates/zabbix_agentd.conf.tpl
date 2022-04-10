@@ -4,3 +4,4 @@ LogFileSize=0
 Server=10.115.13.101
 ServerActive=10.115.13.101
 Hostname={{ ansible_hostname }}
+EnableRemoteCommands=1

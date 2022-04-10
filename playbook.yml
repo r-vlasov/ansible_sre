@@ -5,10 +5,10 @@
   vars_files: "vars.yml"
   roles:
     #- mysql
-      #- selinux
-      # - zabbix
+    #- selinux
+    - zabbix
       #- apache
-    - wordpress
-    - nginx
+      #- wordpress
+      #- nginx
 
 ...
