@@ -61,5 +61,5 @@
 - name: Update WordPress config file - WPSITEURL, WPHOME
   lineinfile:
     path: "/var/www/{{ http_host }}/wp-config.php"
-    line: "define('WP_SITEURL','http://{{ inventory_hostname }}');\ndefine('WP_HOME','http://{{ inventory_hostname }}');\n"
+    line: "define('WP_SITEURL','http://{{ balancer_hostname }}');\ndefine('WP_HOME','http://{{ balancer_hostname }}');\n"
 ...

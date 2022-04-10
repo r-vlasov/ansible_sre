@@ -6,9 +6,9 @@
   roles:
     #- mysql
     #- selinux
-    - zabbix
-      #- apache
-      #- wordpress
+    #- zabbix
+    #- apache
+    - wordpress
       #- nginx
 
 ...

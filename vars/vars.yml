@@ -11,6 +11,7 @@ db_root_password: "thereshouldbethesecret"
 http_host: "wp.example.com"
 http_port: "8080"
 http_conf: "wp.conf"
+balancer_hostname: "sth13.srequest.ru"
 
 #nginx
 nginx_path: "/etc/nginx"
