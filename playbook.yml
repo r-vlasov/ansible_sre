@@ -8,7 +8,7 @@
     #- selinux
     #- zabbix
     #- apache
-    - wordpress
-      #- nginx
+    #- wordpress
+    - nginx
 
 ...
